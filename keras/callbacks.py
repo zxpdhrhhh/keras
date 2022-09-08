@@ -2351,11 +2351,16 @@ class TensorBoard(Callback, version_utils.TensorBoardVersionSelector):
     model = MyModel()
     model.compile('sgd', 'mse')
 
-    # Make sure to set `update_freq=N` to log a batch-level summary every N
-    # batches.  In addition to any `tf.summary` contained in `Model.call`,
-    # metrics added in `Model.compile` will be logged every N batches.
+    # Make sure to set `update_freq=N` to log a batch-level summary every N batches.
+    # In addition to any `tf.summary` contained in `Model.call`, metrics added in
+    # `Model.compile` will be logged every N batches.
     tb_callback = tf.keras.callbacks.TensorBoard('./logs', update_freq=1)
-    model.fit(x_train, y_train, callbacks=[tb_callback])
+
+    # Wrap model.fit() call in a summary writer context
+    debug_writer = tf.summary.create_file_writer(work_path + "/debug")
+    with debug_writer.as_default(step=model.step):
+        model.fit(x_train, y_train, callbacks=[tb_callback])
+    debug_writer.flush()
     ```
 
     Custom batch-level summaries in a Functional API Model:
@@ -2371,11 +2376,16 @@ class TensorBoard(Callback, version_utils.TensorBoardVersionSelector):
     model = tf.keras.Model(inputs, outputs)
     model.compile('sgd', 'mse')
 
-    # Make sure to set `update_freq=N` to log a batch-level summary every N
-    # batches. In addition to any `tf.summary` contained in `Model.call`,
-    # metrics added in `Model.compile` will be logged every N batches.
+    # Make sure to set `update_freq=N` to log a batch-level summary every N batches.
+    # In addition to any `tf.summary` contained in `Model.call`, metrics added in
+    # `Model.compile` will be logged every N batches.
     tb_callback = tf.keras.callbacks.TensorBoard('./logs', update_freq=1)
-    model.fit(x_train, y_train, callbacks=[tb_callback])
+
+    # Wrap model.fit() call in a summary writer context
+    debug_writer = tf.summary.create_file_writer(work_path + "/debug")
+    with debug_writer.as_default(step=model.step):
+        model.fit(x_train, y_train, callbacks=[tb_callback])
+    debug_writer.flush()
     ```
 
     Profiling:
